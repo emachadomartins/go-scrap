@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"github.com/emachadomartins/go-scrap/errs"
 	"github.com/playwright-community/playwright-go"
+	"os"
 )
 
 func main() {
@@ -19,5 +19,32 @@ func main() {
 		)
 	}()
 
-	fmt.Println("Hello World")
+	page := errs.TryCatch(
+		browser.NewPage(),
+	)
+
+	defer func() {
+		errs.ThrowOnError(
+			page.Close(),
+		)
+	}()
+
+	errs.TryCatch(
+		page.Goto("https://example.com"),
+	)
+
+	html := errs.TryCatch(
+		page.Content(),
+	)
+
+	errs.ThrowOnError(
+		os.MkdirAll("./output", 0755),
+	)
+
+	errs.ThrowOnError(
+		os.WriteFile(
+			"./output/example.html",
+			[]byte(html),
+			0644),
+	)
 }
